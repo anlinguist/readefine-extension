@@ -1,0 +1,72 @@
+#nav-options {
+    margin-right: 20px;
+    font-size: 22px;
+    cursor: pointer;
+    background-color: white;
+}
+
+#signed-in-nav-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    z-index: 1111111;
+}
+
+.nav-link {
+    margin: 0 10px;
+    cursor: pointer;
+    text-decoration: unset;
+    color: black;
+    font-size: 18px;
+}
+
+#user-img {
+    max-height: 50px;
+    border-radius: 50%;
+    display: block;
+    margin: 10px auto;
+}
+
+#account_settings {
+    text-align: center;
+}
+
+
+#account_greeting {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+#readefine_count_msg {
+    margin: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+#readefine_count {
+    border-bottom: 1px solid #ffde00;
+}
+
+#signoutbtn {
+    all: unset;
+    text-align: center;
+    border-radius: 8px;
+    caret-color: transparent;
+    padding: 20px 20px;
+    font-size: 20px;
+    color: black;
+    background-color: #ffde00;
+    border: 1px solid #ffde00;
+    width: 50%;
+    cursor: pointer;
+    font-size: 15px;
+    max-width: 150px;
+    margin: 20px auto;
+}
+
+#signoutbtn:hover {
+    background-color: #ffe74e;
+    color:#444444;
+    border-color: #ffe74e;
+}
