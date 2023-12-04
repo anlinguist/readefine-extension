@@ -1,0 +1,18 @@
+{
+  "name": "readefine",
+  "version": "1.0.0",
+  "description": "This is the Readefine client extension. Using the chrome/ directory + the build.py, we can build out the other 4 extensions (Edge, Firefox, Safari (iOS + MacOS)).",
+  "main": "build.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "buildff": "node firefoxBuild.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github-readefine-app:readefine-app/readefineextension.git"
+  },
+  "author": "Andrew Nelson",
+  "license": "ISC"
+}

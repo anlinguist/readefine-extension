@@ -1,4 +1,7 @@
 .DS_Store
+chrome
+chrome/*
+chrome.zip
 edge/*
 edge
 safari/*
@@ -18,3 +21,7 @@ chrome_prod/
 chrome_prod/*
 chrome/popup/node_modules/
 chrome/popup/node_modules/*
+previous_popup_package.json
+previous_popup_snapshot.json
+previous_select_to_readefine_package.json
+previous_select_to_readefine_snapshot.json

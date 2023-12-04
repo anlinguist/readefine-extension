@@ -1,0 +1,269 @@
+@font-face {
+  font-family: 'RDFN Material Icons';
+  src: url('./assets/google_fonts.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  overflow: hidden;
+  background-color: transparent;
+}
+
+.App {
+  text-align: center;
+  display: flex;
+}
+
+.RDFNAI {
+  border-radius: 8px;
+  box-shadow: 4px 3px 9px 0 grey;
+  color: #000;
+  font-family: RDFN Roboto-Light,sans-serif!important;
+  margin: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  background-color: #fefae2;
+}
+
+
+#hl2rdfnlogo {
+  height: 40px;
+  filter: drop-shadow(grey 1.5px 2px 1px);
+  margin-right: 10px;
+}
+
+#hl2rdfnspan {
+  font-size: 16px;
+}
+
+
+.upgradeRDFN {
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #ffde00;
+  margin: 10px;
+  border-radius: 6px;
+  font-family: 'Roboto-Light';
+  cursor: pointer;
+}
+
+.rdfnOperationTargetContainer {
+  border: 1px solid #ccc;
+  margin: 5px;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.rdfnOperationTargetContainer input {
+  padding: 5px;
+  border: 1px solid #ffde00;
+  border-radius: 2px;
+  margin: 2px;
+}
+
+.rdfnOperationTargetContainer input:focus {
+  outline: none;
+}
+
+.rdfnOperationTargetDisplay {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+}
+
+.rdfnOperationTargetDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+  overflow: scroll;
+  display: none;
+  z-index: 111;
+  max-height: 85px;
+}
+
+.rdfnOperationTargetDropdown.active {
+  display: block;
+}
+
+.rdfnOperationTargetContainer:last-of-type .rdfnOperationTargetDropdown {
+  left: unset;
+  right: 0;
+}
+
+.rdfnOperationTargetDropdown li {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.rdfnOperationTargetDropdown li:hover {
+  background-color: #ddd;
+}
+
+.arrow {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid black;
+  transition: transform 0.3s ease;
+  margin-left: 5px;
+}
+
+.rdfnOperationTargetContainer.active .arrow {
+  transform: rotate(180deg);
+}
+
+.rdfnPlayButton {
+  background-color: unset;
+  border: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.rdfnPlayButton svg {
+  fill: #666;
+}
+
+.rdfnPseudoSelection {
+  background-color: #fff4cc;
+}
+
+.RDFNAITOP {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.RDFNAIBTM {
+  background-color: white;
+  width: 100%;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  padding: 10px;
+  display: flex;
+  box-sizing: border-box;
+  justify-content: space-between;
+  font-size: 14px;
+  align-items: center;
+}
+
+.readefineGPT-loader {
+  border-radius: 50%;
+  min-width: 20px;
+  max-width: 20px;
+  min-height: 20px;
+  margin: 0px 5px;
+  max-height: 20px;
+  border: 6px solid transparent;
+  border-top: 3px solid #ffde00;
+  animation: rotating .6s infinite linear;
+}
+
+@keyframes rotating {
+  100% {
+      transform: rotate(360deg);
+  }
+}
+
+.errorMessage {
+  text-align: center;
+}
+
+.exceededDailyLimit a {
+  text-decoration: unset;
+  color: black;
+}
+
+.exceededDailyLimit a div {
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dict_class {
+  font-family: 'RDFN Material Icons';
+  margin-right: 10px;
+  font-size: 20px;
+  color: gray;
+  cursor: pointer;
+}
+
+.RDFNAIBTMBTNS {
+  display: flex;
+  align-items: center;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .RDFNAI {
+    background-color: #333;
+    color: #fff;
+  }
+
+  .RDFNAIBTM {
+    background-color: #222;
+    color: #fff;
+  }
+
+  .rdfnOperationTargetContainer {
+    border: 1px solid #666;
+  }
+
+  .rdfnOperationTargetDropdown {
+    border: 1px solid #666;
+  }
+
+  .rdfnOperationTargetDropdown li:hover {
+    background-color: #444;
+  }
+
+  .rdfnOperationTargetDropdown li {
+    color: #fff;
+  }
+
+  .rdfnPlayButton svg {
+    fill: #666;
+  }
+
+  .RDFNAIBTMBTNS {
+    color: #fff;
+  }
+
+  .dict_class {
+    color: #666;
+  }
+
+  .rdfnOperationTargetDropdown {
+    background-color: #666;
+  }
+
+  .rdfnOperationTargetContainer input {
+    background-color: #666;
+    color: white;
+  }
+
+  .rdfnOperationTargetContainer input::placeholder {
+    color: white;
+  }
+
+  .arrow {
+    border-top-color: #666;
+  }
+
+  .exceededDailyLimit a div {
+    color: #fff;
+  }
+}
