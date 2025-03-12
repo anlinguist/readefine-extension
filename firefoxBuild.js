@@ -40,7 +40,7 @@ class FirefoxBuildManager {
 
         this.startLoading(copyingMessage);
         const ignoreList = ["node_modules", "public", "src", ".gitignore", "package-lock.json", "package.json", "README.md"];
-        this.copyFilesToDestination('./source', destinationDir, ignoreList);
+        this.copyFilesToDestination('./chrome', destinationDir, ignoreList);
         this.stopLoading(copiedMessage);
     }
 
@@ -50,7 +50,8 @@ class FirefoxBuildManager {
         const firefoxResourcesDir = './firefox';
         const firefoxManifestPath = path.join(firefoxResourcesDir, 'manifest.json');
 
-        await this.modifyFilesInDirectory(firefoxResourcesDir, '.js', 'chrome.', 'browser.');
+        await this.modifyFilesInDirectory(firefoxResourcesDir, '.js', 'chrome\\?chrome\\.', 'browser?browser.');
+        await this.modifyFilesInDirectory(firefoxResourcesDir, '.js', 'chrome\\.', 'browser.');
         await this.modifyFilesInDirectory(firefoxResourcesDir, '.css', '#root,.App,body,html{font-family:Roboto-Light;height:100%}', '#root,.App,body,html{font-family:Roboto-Light;min-width:380px;min-height:600px;}html.contextContentScript #root,html.contextContentScript .App,html.contextContentScript body,html.contextContentScript{min-width:350px;min-height:515px;}');
         await this.modifyFirefoxManifest(firefoxManifestPath);
     }
@@ -100,18 +101,36 @@ class FirefoxBuildManager {
     async modifyFirefoxManifest(manifestPath) {
         const manifestData = JSON.parse(await fsPromises.readFile(manifestPath, 'utf8'));
         manifestData['background'] = {
-            'scripts': ["js/background.js"]
+            'scripts': ['background/serviceWorker.js'],
+            'type': 'module'
         };
+
+        manifestData['permissions'] = ['storage']
 
         manifestData['browser_specific_settings'] = {
             'gecko': {
                 'id': 'readefine@app',
-                'strict_min_version': '53.0'
+                'strict_min_version': '58.0'
             }
+        }
+
+        manifestData["sidebar_action"] = {
+            "default_icon": {
+                "16": "assets/exticon.png",
+                "32": "assets/exticon.png"
+            },
+            "default_title": "Readefine",
+            "default_panel": "/popup/index.html",
+            "open_at_install": true
+        }
+
+        manifestData['action'] ={
+            "default_icon": "assets/exticon.png"
         }
 
         delete manifestData['externally_connectable'];
         delete manifestData['key'];
+        delete manifestData['side_panel']
 
         await fsPromises.writeFile(manifestPath, JSON.stringify(manifestData, null, 4));
     }

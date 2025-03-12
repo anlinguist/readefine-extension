@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<script src="./auth.js"></script>
+<!--
+    This page will be loaded as an offscreen document.
+    It will be used to authenticate the user with firebase. Here's how it works:
+
+    1. When user signs into web app, the app will send a message to the extension which
+    will include a custom token.
+    2. When the extension receives the message from the web app, it will open the
+    offscreen page (if it's not already opened), and use signInWithCustomToken()
+    to authenticate the user.
+-->

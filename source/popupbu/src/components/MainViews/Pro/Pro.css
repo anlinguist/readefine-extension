@@ -1,0 +1,442 @@
+@import url('data:text/css;charset=utf-8;base64,QGZvbnQtZmFjZSB7CiAgZm9udC1mYW1pbHk6ICdSb2JvdG8nOwogIGZvbnQtc3R5bGU6IG5vcm1hbDsKICBmb250LXdlaWdodDogMzAwOwogIGZvbnQtZGlzcGxheTogc3dhcDsKICBzcmM6IHVybChodHRwczovL2ZvbnRzLmdzdGF0aWMuY29tL3Mvcm9ib3RvL3YzMC9LRk9sQ25xRXU5MkZyMU1tU1U1dkF3LnR0ZikgZm9ybWF0KCd0cnVldHlwZScpOwp9CkBmb250LWZhY2UgewogIGZvbnQtZmFtaWx5OiAnUm9ib3RvJzsKICBmb250LXN0eWxlOiBub3JtYWw7CiAgZm9udC13ZWlnaHQ6IDQwMDsKICBmb250LWRpc3BsYXk6IHN3YXA7CiAgc3JjOiB1cmwoaHR0cHM6Ly9mb250cy5nc3RhdGljLmNvbS9zL3JvYm90by92MzAvS0ZPbUNucUV1OTJGcjFNZTVRLnR0ZikgZm9ybWF0KCd0cnVldHlwZScpOwp9CkBmb250LWZhY2UgewogIGZvbnQtZmFtaWx5OiAnUm9ib3RvJzsKICBmb250LXN0eWxlOiBub3JtYWw7CiAgZm9udC13ZWlnaHQ6IDUwMDsKICBmb250LWRpc3BsYXk6IHN3YXA7CiAgc3JjOiB1cmwoaHR0cHM6Ly9mb250cy5nc3RhdGljLmNvbS9zL3JvYm90by92MzAvS0ZPbENucUV1OTJGcjFNbUVVOXZBdy50dGYpIGZvcm1hdCgndHJ1ZXR5cGUnKTsKfQpAZm9udC1mYWNlIHsKICBmb250LWZhbWlseTogJ1JvYm90byc7CiAgZm9udC1zdHlsZTogbm9ybWFsOwogIGZvbnQtd2VpZ2h0OiA3MDA7CiAgZm9udC1kaXNwbGF5OiBzd2FwOwogIHNyYzogdXJsKGh0dHBzOi8vZm9udHMuZ3N0YXRpYy5jb20vcy9yb2JvdG8vdjMwL0tGT2xDbnFFdTkyRnIxTW1XVWx2QXcudHRmKSBmb3JtYXQoJ3RydWV0eXBlJyk7Cn0K');
+
+@font-face {
+  font-family: Roboto-Light;
+  src: url('../../../assets/Roboto-Light.ttf')
+}
+
+@font-face {
+  font-family: Material Icons;
+  src: url('../../../assets/google_fonts.woff2')
+}
+
+#root,
+.App,
+body,
+html {
+  height: 100%;
+  font-family: Roboto-Light;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none
+}
+
+.App-header {
+  background-color: #282c34;
+  color: #fff;
+  flex-direction: column;
+  font-size: calc(10px + 2vmin);
+  justify-content: center;
+  min-height: 100vh
+}
+
+#header-container,
+.App-header {
+  align-items: center;
+  display: flex
+}
+
+#header-container {
+  justify-content: space-between;
+  margin-bottom: 10px;
+  z-index: 11111111
+}
+
+.mainlogo {
+  -webkit-filter: drop-shadow(3px 4px 2px grey);
+  filter: drop-shadow(3px 4px 2px grey);
+  max-width: 90px;
+  -webkit-transform: translateZ(0);
+  width: 90px
+}
+
+.rdfn-logo-letter {
+  fill: #000;
+  font-family: Roboto-Regular, Roboto;
+  font-size: 360px;
+  font-weight: 400
+}
+
+.rdfn-logo-letter-unbold {
+  fill: #000;
+  font-family: Roboto-Light, Roboto;
+  font-size: 360px;
+  font-weight: 300
+}
+
+.switch {
+  display: inline-block;
+  height: 28px;
+  margin-left: 10px;
+  margin-right: 10px;
+  min-width: 45px;
+  position: relative;
+  width: 45px
+}
+
+.switch input {
+  height: 0;
+  opacity: 0;
+  width: 0
+}
+
+.slider {
+  background-color: #666;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  right: 0;
+  top: 0
+}
+
+.slider,
+.slider:before {
+  position: absolute;
+  transition: .4s
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 4px;
+  content: "";
+  height: 21px;
+  left: 4px;
+  width: 21px
+}
+
+input:checked+.slider {
+  background-color: #ffde00
+}
+
+input:focus+.slider {
+  box-shadow: 0 0 1px #ffde00
+}
+
+input:checked+.slider:before {
+  -webkit-transform: translateX(17px);
+  transform: translateX(17px)
+}
+
+.slider.round {
+  border-radius: 34px
+}
+
+.slider.round:before {
+  border-radius: 50%
+}
+
+.enablerdfntoggle-container {
+  align-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.enablerdfntoggle-title {
+  font-size: 16px
+}
+
+.dictionary_title {
+  background-color: #fff;
+  font-size: 24px;
+  text-align: center;
+  z-index: 1111;
+  position: absolute;
+  top: 77px;
+  left: 0;
+  right: 0;
+}
+
+#rdfnmodetitle {
+  font-size: 16px;
+  font-weight: 700;
+  height: 20px
+}
+
+#rdfnmode {
+  display: flex;
+  margin: 10px 15px;
+}
+
+.wrapper .option {
+  align-items: center;
+  background: transparent;
+  border: 2px solid #d3d3d3;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  flex: 1 1;
+  justify-content: center;
+  padding: 15px;
+  transition: all .3s ease
+}
+
+.wrapper .option .dot {
+  background: #d9d9d9;
+  border-radius: 50%;
+  height: 10px;
+  margin-right: 10px;
+  position: relative;
+  width: 10px
+}
+
+.wrapper .option span {
+  font-size: 16px
+}
+
+.wrapper .option .dot:before {
+  background: #ffde00;
+  border-radius: 50%;
+  content: "";
+  height: 6px;
+  left: 2px;
+  opacity: 0;
+  position: absolute;
+  top: 2px;
+  -webkit-transform: scale(1.5);
+  transform: scale(1.5);
+  transition: all .3s ease;
+  width: 6px
+}
+
+input[type=radio] {
+  display: none
+}
+
+.option-1 {
+  margin-right: 5px
+}
+
+.option-2 {
+  margin-left: 5px
+}
+
+#option-1:checked~.option-1,
+#option-2:checked~.option-2 {
+  background: #ffde00;
+  border-color: #ffde00
+}
+
+#option-1:checked~.option-1 .dot,
+#option-2:checked~.option-2 .dot {
+  background: #000
+}
+
+#option-1:checked~.option-1 .dot:before,
+#option-2:checked~.option-2 .dot:before {
+  opacity: 1;
+  -webkit-transform: scale(1);
+  transform: scale(1)
+}
+
+#option-1:checked~.option-1 span,
+#option-2:checked~.option-2 span {
+  color: #000
+}
+
+.settingscontainer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0
+}
+
+.settingsname {
+  font-size: 16px;
+  font-weight: 700
+}
+
+#allsettingscontainer {
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 10px 25px;
+}
+
+.rdfnmodeexplainer {
+  align-items: center;
+  background-color: #fefae2;
+  border-radius: 6px;
+  display: flex;
+  font-size: 16px;
+  padding: 10px;
+  margin: 0 15px;
+  color: black;
+}
+
+.rdfnmodeexplainer p {
+  flex: 1 1;
+  margin: 5px;
+  color: black;
+}
+
+.rdfnmodeexclamation {
+  font-family: Material Icons;
+  font-size: 24px;
+  margin: 0 10px;
+  text-align: center
+}
+
+
+
+
+/*  */
+
+#locationchooser {
+  display: flex;
+  margin: 10px 15px;
+}
+
+.option-US {
+  margin-right: 5px
+}
+
+.option-UK {
+  margin-left: 5px
+}
+
+#option-US:checked~.option-US,
+#option-UK:checked~.option-UK {
+  background: #ffde00;
+  border-color: #ffde00
+}
+
+#option-US:checked~.option-US .dot,
+#option-UK:checked~.option-UK .dot {
+  background: #000
+}
+
+#option-US:checked~.option-US .dot:before,
+#option-UK:checked~.option-UK .dot:before {
+  opacity: 1;
+  -webkit-transform: scale(1);
+  transform: scale(1)
+}
+
+#option-US:checked~.option-US span,
+#option-UK:checked~.option-UK span {
+  color: #000
+}
+
+#locationchooser.collapsed {
+  height: 0px;
+  overflow: hidden;
+  margin: unset;
+}
+
+#rdfnsettings {
+    flex: 1 1;
+    overflow: scroll;
+    position: fixed;
+    top: 77px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+#usergreeting #rdfnsettings {
+  bottom: 0;
+  flex: 1 1;
+  overflow: scroll;
+  position: unset;
+}
+
+#usergreeting #rdfnsettings .dictionary_title {
+  display: none;
+}
+
+#usergreeting #rdfnsettings #allsettingscontainer {
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+}
+
+#usergreeting #rdfnsettings #rdfnmode {
+  display: flex;
+  margin: 10px 0;
+}
+
+#usergreeting #rdfnsettings .rdfnmodeexplainer {
+  align-items: center;
+    background-color: #fefae2;
+    border-radius: 6px;
+    display: flex;
+    font-size: 16px;
+    padding: 10px;
+    margin: unset;
+    color: black;
+}
+
+#usergreeting #rdfnsettings #locationchooser {
+  display: flex;
+  margin: 10px 0;
+}
+
+#propagecontainer {
+  flex: 1 1;
+  overflow: scroll;
+  position: relative;
+}
+
+#rdfnProUpgradeCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin: 5px auto;
+  width: 250px;
+  text-align: center;
+}
+
+#rdfnProCardHeader {
+  padding: 20px;
+  text-align: center;
+}
+
+#rdfnProCardHeader h2 {
+  font-size: 24px;
+  font-weight: 100;
+  margin: 10px;
+}
+
+#rdfnProPrice {
+  font-size: 46px;
+  font-weight: bold;
+}
+
+#rdfnProPricePeriod {
+  margin-left: 5px;
+  font-size: 24px;
+  color: #333;
+}
+
+#rdfnProCardBody {
+  padding: 20px;
+  text-align: left;
+  background-color: #f7fafc;
+  border-bottom-right-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.rdfnProFeature {
+  margin: 5px 0;
+}
+
+#rdfnProUpgradeBtn {
+  /* Add your button styling here */
+}
+
+/* DARK MODE */
+@media (prefers-color-scheme: dark) {
+  .mainlogo {
+    filter: drop-shadow(3px 4px 2px #666);
+  }
+}

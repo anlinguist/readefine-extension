@@ -6,13 +6,35 @@
   "type": "module",
   "scripts": {
     "build": "node build.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "buildff": "node firefoxBuild.js"
+    "copy-popup": "rsync -av --progress --exclude 'node_modules' --exclude 'dist' ../readefinewebapp/ ./source/popup",
+    "copy-popupdeps": "rsync -av --progress ./source/popupdeps/ ./source/popup/",
+    "build-popup": "cd ./source/popup && bun i --save-dev @types/chrome && bun run build",
+    "prepare-popup": "bun run copy-popup && bun run copy-popupdeps && bun run build-popup",
+    "prepare-select-to-readefine": "cd ./source/select-to-readefine && bun i --save-dev @types/chrome && bun run build"
   },
   "repository": {
     "type": "git",
     "url": "git@github-readefine-app:readefine-app/readefineextension.git"
   },
   "author": "Andrew Nelson",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.22.20",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "cssnano": "^7.0.6",
+    "postcss-cli": "^11.0.0",
+    "rollup": "^2.79.1",
+    "rollup-plugin-delete": "^2.1.0",
+    "rollup-plugin-polyfill-node": "^0.13.0",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-styles": "^4.0.0",
+    "ts-migrate": "^0.1.35"
+  },
+  "dependencies": {
+    "@types/chrome": "^0.0.283"
+  }
 }

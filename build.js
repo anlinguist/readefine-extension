@@ -2,80 +2,49 @@ import { copyFileSync, readdirSync, statSync, existsSync, readFileSync, writeFil
 import path from 'path';
 import FirefoxBuildManager from './firefoxBuild.js';
 import { exec } from 'child_process';
+import { rm } from 'fs/promises';
+import { rollup } from 'rollup';
+
+import typescript from '@rollup/plugin-typescript';
+import terser from '@rollup/plugin-terser';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import postcss from 'postcss';
+import cssnano from 'cssnano';
 
 class BuildManager {
     constructor() {
-        this.originalPreviousPopupSnapshot = null;
-        this.originalPreviousSelectToReadefineSnapshot = null;
-        this.originalPopupPackageJson = null;
-        this.originalSelectToReadefinePackageJson = null;
-
         this.frames = ["⠙", "⠘", "⠰", "⠴", "⠤", "⠦", "⠆", "⠃", "⠋", "⠉"];
         this.loadingInterval = null;
         this.lastMessageLength = 0;
         this.alreadyBuilt = false;
         this.buildAll = false;
+        this.justSafari = false;
         this.verbose = false;
     }
 
     async build() {
         this.processArgs();
 
+        if (this.justSafari) {
+            await this.prepareSafari();
+            return;
+        }
+
+        if (!existsSync('chrome')) {
+            mkdirSync('chrome');
+        }
+        if (!existsSync('chrome/popup')) {
+            mkdirSync('chrome/popup');
+        }
         await this.prepareChrome();
-        console.log("finished preparing chrome, moving on to other browsers")
-        const arg = process.argv[2]
 
         if (this.buildAll) {
-            await this.prepareFirefox();
             await this.prepareEdge();
+            await this.prepareFirefox();
+            await this.prepareSafari();
         }
-
-    }
-
-    async checkAndBuildSource() {
-        await this.checkAndBuildAppSource('./source/popup', 'previous_popup_snapshot.json');
-        await this.checkAndBuildAppSource('./source/select-to-readefine', 'previous_select_to_readefine_snapshot.json');
-    }
-
-    async checkAndBuildAppSource(appPath, snapshotFileName) {
-        const sourceDir = `${appPath}/src`;
-
-        if (this.hasDirectoryChanged(sourceDir, snapshotFileName) && !this.alreadyBuilt) {
-            this.startLoading(`Rebuilding the Readefine app at ${appPath} to use the latest source code.`);
-            await this.execAsync('npm run build', { cwd: appPath });
-            this.stopLoading("Build complete.");
-            this.alreadyBuilt = true;
-        } else if (!this.alreadyBuilt) {
-            console.log(`No changes detected in Readefine app source code at ${appPath}.`);
-        }
-    }
-
-    async checkAndUpdateAppDependencies(appPath, previousPackageJsonFileName) {
-        const packageJsonPath = `${appPath}/package.json`;
-        let packageJsonPreviousContent = '';
-
-        if (existsSync(previousPackageJsonFileName)) {
-            packageJsonPreviousContent = readFileSync(previousPackageJsonFileName, 'utf8');
-        }
-
-        const packageJsonCurrentContent = readFileSync(packageJsonPath, 'utf8');
-
-        if (packageJsonCurrentContent !== packageJsonPreviousContent) {
-            copyFileSync(packageJsonPath, previousPackageJsonFileName);
-            this.startLoading(`Installing package dependencies for ${appPath}${packageJsonPreviousContent ? ' (package.json changed).' : '.'}`);
-            await this.execAsync('npm i', { cwd: appPath });
-            this.stopLoading("Dependencies installed.");
-
-            this.startLoading(`Building the Readefine app at ${appPath} to use the latest dependencies.`);
-            await this.execAsync('npm run build', { cwd: appPath });
-            this.stopLoading("Build complete.");
-            this.alreadyBuilt = true;
-        }
-    }
-
-    async checkAndUpdateDependencies() {
-        await this.checkAndUpdateAppDependencies('./source/popup', 'previous_popup_package.json');
-        await this.checkAndUpdateAppDependencies('./source/select-to-readefine', 'previous_select_to_readefine_package.json');
+        await this.removeExtraFiles();
     }
 
     copyFilesToDestination(src, dest, ignore = []) {
@@ -106,7 +75,7 @@ class BuildManager {
         }
     }
 
-    async copySourceToDestination(destinationDir) {
+    async copyChromeToDestination(destinationDir) {
         const startMessage = `Deleting existing ${destinationDir} folder.`;
         const deleteErrorMessage = `Failed to remove directory in ${destinationDir}: `;
         const noFolderMessage = `No existing ${destinationDir} folder found.`;
@@ -132,8 +101,71 @@ class BuildManager {
 
         this.startLoading(copyingMessage);
         const ignoreList = ["node_modules", "public", "src", ".gitignore", "package-lock.json", "package.json", "README.md"];
-        this.copyFilesToDestination('./source', destinationDir, ignoreList);
+        this.copyFilesToDestination('./chrome', destinationDir, ignoreList);
         this.stopLoading(copiedMessage);
+    }
+
+    async copySourceToDestination(browser = 'chrome') {
+        this.startLoading(`Deleting existing /${browser} folder.`);
+
+        let deleted = false;
+        try {
+            await rm(`./${browser}`, { recursive: true, force: true });
+            deleted = true
+        } catch (error) {
+            console.error(`Failed to remove directory: ${error}`);
+        }
+
+        if (!deleted) {
+            this.stopLoading(`No existing /${browser} folder found.`);
+        } else {
+            this.stopLoading(`Deleted existing /${browser} folder.`);
+        }
+
+        this.startLoading(`Copying source folder to /${browser}.`);
+        const ignoreList = [
+            "MailFramesBaseCS.ts",
+            "node_modules",
+            "public",
+            "src",
+            ".gitignore",
+            "package-lock.json",
+            "package.json",
+            "README.md",
+            "background",
+            "auth.ts",
+            "popupdeps",
+            "content",
+            "tsconfig.json",
+            "popup",
+            "dist",
+            "global.d.ts",
+            "popupbu",
+            "index.html",
+            ".eslintrc.cjs",
+            "bun.lockb",
+            "vite.config.js",
+            "vite.config.ts",
+            "tsconfig.node.json",
+            "tsconfig.app.json",
+            "tsconfig.app.tsbuildinfo",
+            "tsconfig.node.tsbuildinfo",
+            "eslint.config.js",
+        ];
+        this.copyFilesToDestination('./source', `./${browser}`, ignoreList);
+        this.stopLoading(`Source folder copied to /${browser}.`);
+
+        this.startLoading(`Copying compiled popup ts files to /${browser}/popup.`);
+        this.copyFilesToDestination('./source/popup/dist', `./${browser}/popup`);
+        this.stopLoading(`Popup copied to /${browser}/popup.`);
+
+        this.startLoading(`Copying compiled select to readefine files to /${browser}/select-to-readefine.`);
+        this.copyFilesToDestination(`./source/select-to-readefine/dist`, `./${browser}/select-to-readefine/build`);
+        this.stopLoading(`Select to Readefine copied to /${browser}/select-to-readefine.`);
+
+        this.startLoading(`Copying compiled background ts files to /${browser}/background.`);
+        this.copyFilesToDestination(`./source/dist`, `./${browser}`);
+        this.stopLoading(`Background and Content Scripts copied to /${browser}/background and /${browser}/content.`);
     }
 
     execAsync(command, options = {}) {
@@ -160,58 +192,162 @@ class BuildManager {
             process.on('SIGINT', () => {
                 child.kill();
                 this.terminateLoading();
-                this.restoreOriginalJSONs();
                 process.exit(1);
             });
         });
     }
 
-    generateSnapshot(dir) {
-        let list = [];
-        const files = readdirSync(dir);
-        files.forEach(file => {
-            const fullPath = path.join(dir, file);
-            const stat = statSync(fullPath);
-            if (stat.isDirectory()) {
-                list = list.concat(this.generateSnapshot(fullPath));
-            } else if (stat.isFile()) {
-                list.push({ path: fullPath, mtime: stat.mtimeMs });
-            }
-        });
-        return list;
-    }
-
-    hasDirectoryChanged(directory, snapshotFile) {
-        const currentSnapshot = this.generateSnapshot(directory).sort((a, b) => a.path.localeCompare(b.path));
-        const currentSnapshotString = JSON.stringify(currentSnapshot);
-        let previousSnapshotString = '';
-
-        if (existsSync(snapshotFile)) {
-            previousSnapshotString = readFileSync(snapshotFile, 'utf8');
-        }
-
-        if (currentSnapshotString !== previousSnapshotString) {
-            writeFileSync(snapshotFile, currentSnapshotString);
-            return true;
-        }
-
-        return false;
-    }
-
     async prepareChrome() {
+        await this.checkAndUpdateDependencies();
+        await this.copyPopupFromWebApp();
+        await this.prepareSelectToReadefine();
+        await this.buildTypeScript();
+        await this.copySourceToDestination('chrome');
+    }
+
+    async removeExtraFiles() {
         try {
-            this.readOriginalJSONs();
-            await this.checkAndUpdateDependencies();
-            await this.checkAndBuildSource();
-            await this.copySourceToDestination('./chrome');
+            if (existsSync('./source/dist')) {
+                this.startLoading("Removing the source/dist directory.");
+                await rm('./source/dist', { recursive: true });
+                this.stopLoading("Removed the source/dist directory.");
+            }
+            if (existsSync('./source/popup')) {
+                this.startLoading("Removing the source/popup directory.");
+                await rm('./source/popup', { recursive: true });
+                this.stopLoading("Removed the source/popup directory.");
+            }
         } catch (err) {
-            console.log("An error occurred during the build process:", err);
+            console.error(`An error occurred while removing the source/dist directory: ${err}`);
+        }
+    }
+
+    async checkAndUpdateDependencies() {
+        await this.execAsync('bun i', { cwd: './source' });
+    }
+
+    async copyPopupFromWebApp() {
+        this.startLoading("Copying the popup from the web app.");
+        await this.execAsync('bun run prepare-popup', { cwd: './' });
+        this.stopLoading("Popup copied from the web app.");
+    }
+
+    async prepareSelectToReadefine() {
+        this.startLoading("Preparing Select to Readefine.");
+        await this.execAsync('bun run prepare-select-to-readefine', { cwd: './' });
+        this.stopLoading("Select to Readefine prepared.");
+    }
+
+    async buildTypeScript() {
+        this.startLoading("Building the TypeScript files.");
+        let cs = `./source/content/`
+        const allowedCSFiles = ['check_login_status_cs.ts', 'content.ts', 'readefine_version.ts']
+        let contentScriptFiles = readdirSync(cs, { withFileTypes: true })
+            .filter(dirent => dirent.isFile() && dirent.name.endsWith('.ts') && allowedCSFiles.includes(dirent.name))
+            .map(dirent => `${cs}${dirent.name}`);
+        let configurations = [
+            {
+                input: ['./source/background/serviceWorker.ts'],
+                preserveSymlinks: true,
+                plugins: [
+                    nodeResolve({
+                        browser: true,
+                    }),
+                    commonjs(),
+                    typescript({
+                        tsconfig: './source/tsconfig.json'
+                    }),
+                    terser()
+                ],
+                output: {
+                    dir: './source/dist/background',
+                    format: 'es',
+                    entryFileNames: '[name].js'
+                }
+            },
+            {
+                input: ['./source/pages/auth.ts'],
+                preserveSymlinks: true,
+                plugins: [
+                    nodeResolve({
+                        browser: true,
+                    }),
+                    commonjs(),
+                    typescript({
+                        tsconfig: './source/tsconfig.json'
+                    }),
+                    terser()
+                ],
+                output: {
+                    dir: './source/dist/pages',
+                    format: 'es',
+                    entryFileNames: '[name].js'
+                }
+            }
+        ];
+
+        contentScriptFiles.map((file) => {
+            const fileName = file.split('/').pop();
+            const name = fileName.split('.')[0];
+
+            configurations.push({
+                input: file,
+                plugins: [
+                    typescript({
+                        tsconfig: './source/tsconfig.json',
+                    }),
+                    terser({
+                        keep_classnames: true,
+                        keep_fnames: true,
+                        mangle: {
+                            keep_classnames: true,
+                            keep_fnames: true,
+                        },
+                    }),
+                ],
+                output: {
+                    dir: './source/dist/content',
+                    format: 'iife',
+                    entryFileNames: `${name}.js`,
+                    name: `${name}ReadefineImplementation`,
+                },
+            });
+        });
+
+
+        try {
+            for (const config of configurations) {
+                const bundle = await rollup(config);
+                await bundle.write(config.output);
+            }
+
+            const cssInputPath = './source/content/content.css';
+            const cssOutputPath = './source/dist/content/content.css';
+
+            const css = readFileSync(cssInputPath, 'utf8');
+
+            const result = await postcss([
+                cssnano({
+                    preset: 'default',
+                }),
+            ]).process(css, {
+                from: cssInputPath,
+                to: cssOutputPath,
+            });
+
+            writeFileSync(cssOutputPath, result.css);
+            this.stopLoading("TypeScript build complete.");
+        } catch (error) {
+            this.terminateLoading("TypeScript build errors occurred");
+            console.error(error);
+            process.exit(1);
         }
     }
 
     async prepareEdge() {
-        console.log("Preparing Edge extension.")
-        await this.copySourceToDestination('./edge');
+        await this.copySourceToDestination('edge');
+
+        // on dev: need to add key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAphGOYZRZFAoYIAPGJ0dlHmig1uPh3Fp/111n5PPd9px4ObBCEApN1VHq9TfFC3Aquavit7FIrz0v1Cx2t3nXGih/Uf7KJ0ZMRnpjrCsY20kJ4p4InLiWf/51lRbjT3JuI4cWz5SW7Mj8rZC4SHBwXuf+GyWNLuL+2Zi4Xvz7LUiX8MG3HXGnkBWy4pxkXQhRFZpzZRqBfYUzFC49EeGVwckEMLeQGKkp6tTXjL5MLOxudzdVOSZ0T3sjrjCExh3RSGBh9jmQxw13R8N3WbTPFYKmcLzwHom8V6OihOV6CLrr4s2DVOZFyZE64EjusV1JGLE1BxWbMNxqoQjLsnF4DwIDAQAB
     }
 
     async prepareFirefox() {
@@ -219,34 +355,26 @@ class BuildManager {
         await firefoxBuilder.build();
     }
 
-    async modifyFirefoxFiles() {
-        console.log("Modifying Firefox extension files.");
-
-        const firefoxResourcesDir = './firefox';
-        const firefoxManifestPath = path.join(firefoxResourcesDir, 'manifest.json');
-
-        await this.modifyFilesInDirectory(firefoxResourcesDir, '.js', 'chrome.', 'browser.');
-        await this.modifyFilesInDirectory(firefoxResourcesDir, '.css', '#root,.App,body,html{font-family:Roboto-Light;height:100%}', '#root,.App,body,html{font-family:Roboto-Light;min-width:380px;min-height:600px;}html.contextContentScript #root,html.contextContentScript .App,html.contextContentScript body,html.contextContentScript{min-width:350px;min-height:515px;}');
-        await this.modifyFirefoxManifest(firefoxManifestPath);
+    async prepareSafari() {
+        await this.copyChromeToDestination('safari/Readefine/Shared (Extension)/Resources');
+        await this.modifySafariFiles();
     }
 
-    async modifyFirefoxManifest(manifestPath) {
-        const manifestData = JSON.parse(await fsPromises.readFile(manifestPath, 'utf8'));
-        manifestData['background'] = {
-            'scripts': ["js/background.js"]
-        };
+    async modifySafariFiles() {
+        const safariResourcesDir = './safari/Readefine/Shared (Extension)/Resources';
+        const safariManifestPath = path.join(safariResourcesDir, 'manifest.json');
 
-        manifestData['browser_specific_settings'] = {
-            'gecko': {
-                'id': 'readefine@app',
-                'strict_min_version': '53.0'
-            }
-        }
-
-        delete manifestData['externally_connectable'];
-        delete manifestData['key'];
-
-        await fsPromises.writeFile(manifestPath, JSON.stringify(manifestData, null, 4));
+        await this.modifyFilesInDirectory(safariResourcesDir, '.js', 'chrome\\.', 'browser.');
+        await this.modifyFilesInDirectory(safariResourcesDir, '.css', '#root,.App,body,html{font-family:Roboto-Light;height:100%}', '#root,.App,body{font-family:Roboto-Light;height:100%}');
+        await this.modifyFilesInDirectory(
+            safariResourcesDir,
+            '.css',
+            'html,body,#root,\\.App{height:100%}',
+            'html{height:600px;width:400px;}@supports(-webkit-touch-callout:none){html{height:100%; width:100%}} body,#root,.App{height:100%;}'
+          );
+          
+        await this.modifyFilesInDirectory(safariResourcesDir, '.css', 'html,body,#root{height:100%}', 'body,#root{height:100%}');
+        await this.modifySafariManifest(safariManifestPath);
     }
 
     async modifyFilesInDirectory(directory, extension, searchValue, replaceValue) {
@@ -263,6 +391,20 @@ class BuildManager {
         }
     }
 
+    async modifySafariManifest(manifestPath) {
+        const manifestData = JSON.parse(await fsPromises.readFile(manifestPath, 'utf8'));
+        manifestData['background'] = {
+            'persistent': false,
+            'scripts': ["background/serviceWorker.js"],
+            'type': "module"
+        };
+        manifestData['manifest_version'] = 3;
+        manifestData['permissions'] = ["storage", "tabs", "notifications", "nativeMessaging"];
+        manifestData['externally_connectable']['matches'].push("http://127.0.0.1/*")
+
+        await fsPromises.writeFile(manifestPath, JSON.stringify(manifestData, null, 4));
+    }
+
     processArgs() {
         for (let i = 2; i < process.argv.length; i++) {
             const arg = process.argv[i];
@@ -270,41 +412,9 @@ class BuildManager {
                 this.buildAll = true;
             } else if (arg === 'verbose') {
                 this.verbose = true;
+            } else if (arg == 'justsafari') {
+                this.justSafari = true;
             }
-        }
-    }
-
-    readOriginalJSONs() {
-        this.originalPreviousPopupSnapshot = existsSync('previous_popup_snapshot.json')
-            ? readFileSync('previous_popup_snapshot.json', 'utf8')
-            : null;
-        this.originalPreviousSelectToReadefineSnapshot = existsSync('previous_select_to_readefine_snapshot.json')
-            ? readFileSync('previous_select_to_readefine_snapshot.json', 'utf8')
-            : null;
-
-        this.originalPopupPackageJson = existsSync('previous_popup_package.json')
-            ? readFileSync('previous_popup_package.json', 'utf8')
-            : null;
-        this.originalSelectToReadefinePackageJson = existsSync('previous_select_to_readefine_package.json')
-            ? readFileSync('previous_select_to_readefine_package.json', 'utf8')
-            : null;
-    }
-
-    restoreOriginalJSONs() {
-        if (this.originalPreviousPopupSnapshot !== null) {
-            writeFileSync('previous_popup_snapshot.json', this.originalPreviousPopupSnapshot);
-        }
-
-        if (this.originalPreviousSelectToReadefineSnapshot !== null) {
-            writeFileSync('previous_select_to_readefine_snapshot.json', this.originalPreviousSelectToReadefineSnapshot);
-        }
-
-        if (this.originalPopupPackageJson !== null) {
-            writeFileSync('previous_popup_package.json', this.originalPopupPackageJson);
-        }
-
-        if (this.originalSelectToReadefinePackageJson !== null) {
-            writeFileSync('previous_select_to_readefine_package.json', this.originalSelectToReadefinePackageJson);
         }
     }
 

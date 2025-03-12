@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "rootDirs": [
+      "./background",
+      "./content",
+      "./pages"
+    ],
+    "declaration": false,
+    "removeComments": true,
+    "moduleResolution": "node"
+  },
+  "include": [
+    "./background",
+    "./content",
+    "./pages",
+    "types/**/*.d.ts"
+  ]
+}
