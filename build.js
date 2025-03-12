@@ -42,7 +42,7 @@ class BuildManager {
         if (this.buildAll) {
             await this.prepareEdge();
             await this.prepareFirefox();
-            await this.prepareSafari();
+            // await this.prepareSafari();
         }
         await this.removeExtraFiles();
     }
